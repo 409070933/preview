@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>打开Excel文件</title>
+    <script type="text/javascript">
+    function Save() {
+      document.getElementById("PageOfficeCtrl1").WebSave();
+    }
+  </script>
+    <script type="text/javascript">
+    function AddSeal() {
+      try {
+        document.getElementById("PageOfficeCtrl1").ZoomSeal.AddSeal();
+      } catch (e) {
+      }
+    }
+  </script>
+    <script type="text/javascript">
+     try {
+         showComments();
+        /**
+        * excel显示所有批注
+        * pageoffice目前没有可以直接调用的接口.这里使用宏调用office的功能
+        */
+        function showComments(){
+           var mac = "Sub showComments()" + " \r\n"
+                       + "Dim count As Integer" + " \r\n"
+                       + "count = ActiveSheet.Comments.count" + " \r\n"
+                       + "If count > 0 Then" + " \r\n"
+                       +  "    Dim cmt As Comment" + " \r\n"
+                       +  "     For Each cmt In ActiveSheet.Comments" + " \r\n"
+                       +  "         cmt.Visible = True" + " \r\n"
+                       +  "     Next cmt" + " \r\n"
+                       + "End If" + " \r\n"
+                       +  "End Sub" + " \r\n";
+                       document.getElementById("PageOfficeCtrl1").RunMacro("showComments", mac);
+        }
+      } catch (e) {
+      console.log(e)
+      }
+    </script>
+
+</head>
+<body>
+<div style="width:auto;height:700px;" th:utext="${pageoffice}"></div>
+</body>
+</html>
