@@ -6,6 +6,7 @@ import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,12 +15,12 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.server.PathParam;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Map;
 
 @RestController
 public class PageOfficeController {
-
-
     @Value("${posyspath}")
     private String poSysPath;
 
@@ -41,14 +42,18 @@ public class PageOfficeController {
         poCtrl.setSaveFilePage("/save");//设置处理文件保存的请求方法
         String suffix=filePath.substring(filePath.lastIndexOf('.'),filePath.length());
         ModelAndView modelAndView = null;
-        map.put("pageoffice",poCtrl.getHtmlCode("PageOfficeCtrl1"));
         if (suffix.equals(".doc")||suffix.equals(".docx")){
             poCtrl.webOpen("file://"+filePath,OpenModeType.docAdmin,"张三");
+            map.put("pageoffice",poCtrl.getHtmlCode("PageOfficeCtrl1"));
+            request.setAttribute("savePath",filePath );//传递文件路径到页面
             modelAndView = new ModelAndView("Word");
         }else if (suffix.equals(".xlsx")||suffix.equals(".xls")){
             poCtrl.webOpen("file://" + filePath, OpenModeType.xlsNormalEdit, "张三");
+            map.put("pageoffice",poCtrl.getHtmlCode("PageOfficeCtrl1"));
+            request.setAttribute("savePath",filePath );//传递文件路径到页面
             modelAndView = new ModelAndView("Excel");
-        }else if (suffix.equals(".pdf")){
+        }
+        else if (suffix.equals(".pdf")){
             modelAndView = new ModelAndView("/pdf/index");
             modelAndView.addObject("filePath",filePath);
         }
@@ -57,7 +62,8 @@ public class PageOfficeController {
     @RequestMapping("/save")
     public void saveFile(HttpServletRequest request, HttpServletResponse response){
         FileSaver fs = new FileSaver(request, response);
-        fs.saveToFile(poSysPath + fs.getFileName());
+        String savePath = fs.getFormField("savePath");//获取传递的文件路径参数
+        fs.saveToFile(savePath);
         fs.close();
     }
     /**
