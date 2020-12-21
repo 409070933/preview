@@ -41,14 +41,17 @@ public class PageOfficeController {
         poCtrl.setSaveFilePage("/save");//设置处理文件保存的请求方法
         String suffix=filePath.substring(filePath.lastIndexOf('.'),filePath.length());
         ModelAndView modelAndView = null;
+        map.put("pageoffice",poCtrl.getHtmlCode("PageOfficeCtrl1"));
         if (suffix.equals(".doc")||suffix.equals(".docx")){
             poCtrl.webOpen("file://"+filePath,OpenModeType.docAdmin,"张三");
             modelAndView = new ModelAndView("Word");
         }else if (suffix.equals(".xlsx")||suffix.equals(".xls")){
             poCtrl.webOpen("file://" + filePath, OpenModeType.xlsNormalEdit, "张三");
             modelAndView = new ModelAndView("Excel");
+        }else if (suffix.equals(".pdf")){
+            modelAndView = new ModelAndView("/pdf/index");
+            modelAndView.addObject("filePath",filePath);
         }
-        map.put("pageoffice",poCtrl.getHtmlCode("PageOfficeCtrl1"));
         return modelAndView;
     }
     @RequestMapping("/save")
